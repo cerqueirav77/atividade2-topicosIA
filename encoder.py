@@ -90,3 +90,33 @@ def self_attention(X: np.ndarray) -> np.ndarray:
 
 X_att = self_attention(X)
 print(f"\nSaída da Self-Attention — shape: {X_att.shape}")
+
+# Passo 2.2: Conexão Residual e Layer Normalization
+
+EPSILON = 1e-6
+
+
+def layer_norm(tensor: np.ndarray) -> np.ndarray:
+    """
+    Aplica Layer Normalization no último eixo (features).
+
+    Args:
+        tensor (ndarray): Tensor de entrada com shape (Batch, Seq, D_MODEL).
+
+    Returns:
+        ndarray: Tensor normalizado com mesma shape.
+    """
+    media = np.mean(tensor, axis=-1, keepdims=True)
+    variancia = np.var(tensor, axis=-1, keepdims=True)
+    tensor_normalizado = (tensor - media) / np.sqrt(variancia + EPSILON)
+    return tensor_normalizado
+
+
+def adicionar_e_normalizar(tensor_entrada: np.ndarray, saida_sublayer: np.ndarray) -> np.ndarray:
+    """Aplica a conexão residual e normaliza o resultado."""
+    tensor_residual = tensor_entrada + saida_sublayer
+    return layer_norm(tensor_residual)
+
+
+X_norm1 = adicionar_e_normalizar(X, X_att)
+print(f"Saída do Add & LayerNorm 1 — shape: {X_norm1.shape}")
