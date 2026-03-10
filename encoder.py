@@ -152,3 +152,43 @@ def feed_forward_network(tensor: np.ndarray) -> np.ndarray:
 X_ffn = feed_forward_network(X_norm1)
 X_norm2 = adicionar_e_normalizar(X_norm1, X_ffn)
 print(f"Saída da FFN + Add & LayerNorm 2 — shape: {X_norm2.shape}")
+
+# Passo 3: Empilhando 6 camadas do Encoder 
+
+NUM_CAMADAS = 6
+
+
+def encoder_layer(X: np.ndarray) -> np.ndarray:
+    """
+    Executa uma camada completa do Encoder.
+
+    Fluxo:
+        1. Self-Attention
+        2. Add & LayerNorm
+        3. Feed-Forward Network
+        4. Add & LayerNorm
+
+    Args:
+        X (ndarray): Tensor de entrada com shape (Batch, Seq, D_MODEL).
+
+    Returns:
+        ndarray: Tensor de saída com shape (Batch, Seq, D_MODEL).
+    """
+    X_att  = self_attention(X)
+    X_norm1 = adicionar_e_normalizar(X, X_att)
+    X_ffn   = feed_forward_network(X_norm1)
+    X_out   = adicionar_e_normalizar(X_norm1, X_ffn)
+    return X_out
+
+
+print(f"\nIniciando stack do Encoder com {NUM_CAMADAS} camadas...")
+print(f"Shape de entrada: {X.shape}\n")
+
+tensor_atual = X
+for numero_camada in range(1, NUM_CAMADAS + 1):
+    tensor_atual = encoder_layer(tensor_atual)
+    print(f"  Camada {numero_camada} — shape: {tensor_atual.shape}")
+
+Z = tensor_atual
+print(f"\nRepresentação final Z — shape: {Z.shape}")
+print("Validação: entrada e saída com mesmas dimensões?", X.shape == Z.shape)
