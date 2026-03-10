@@ -47,3 +47,46 @@ X = embeddings_sequencia[np.newaxis, :, :]
 
 print(f"Shape do tensor de entrada X: {X.shape}")
 print(f"Esperado: ({BATCH_SIZE}, {sequence_length}, {D_MODEL})")
+
+# Passo 2.1: Scaled Dot-Product Attention 
+
+np.random.seed(7)
+W_query = np.random.randn(D_MODEL, D_MODEL)
+W_key   = np.random.randn(D_MODEL, D_MODEL)
+W_value = np.random.randn(D_MODEL, D_MODEL)
+
+
+def softmax(matriz: np.ndarray) -> np.ndarray:
+    """Aplica softmax linha a linha com estabilidade numérica."""
+    valores_deslocados = matriz - np.max(matriz, axis=-1, keepdims=True)
+    exponenciais = np.exp(valores_deslocados)
+    return exponenciais / np.sum(exponenciais, axis=-1, keepdims=True)
+
+
+def self_attention(X: np.ndarray) -> np.ndarray:
+    """
+    Calcula o Scaled Dot-Product Attention.
+
+    Args:
+        X (ndarray): Tensor de entrada com shape (Batch, Seq, D_MODEL).
+
+    Returns:
+        ndarray: Tensor de saída com shape (Batch, Seq, D_MODEL).
+    """
+    Q = X @ W_query
+    K = X @ W_key
+    V = X @ W_value
+
+    dimensao_k = K.shape[-1]
+    fator_escala = np.sqrt(dimensao_k)
+
+    scores = Q @ K.transpose(0, 2, 1)
+    scores_normalizados = scores / fator_escala
+    pesos_atencao = softmax(scores_normalizados)
+    saida_atencao = pesos_atencao @ V
+
+    return saida_atencao
+
+
+X_att = self_attention(X)
+print(f"\nSaída da Self-Attention — shape: {X_att.shape}")
