@@ -120,3 +120,35 @@ def adicionar_e_normalizar(tensor_entrada: np.ndarray, saida_sublayer: np.ndarra
 
 X_norm1 = adicionar_e_normalizar(X, X_att)
 print(f"Saída do Add & LayerNorm 1 — shape: {X_norm1.shape}")
+
+# Passo 2.3: Feed-Forward Network (FFN)
+
+D_FF = 256
+
+np.random.seed(13)
+W1 = np.random.randn(D_MODEL, D_FF)
+b1 = np.zeros((1, 1, D_FF))
+W2 = np.random.randn(D_FF, D_MODEL)
+b2 = np.zeros((1, 1, D_MODEL))
+
+
+def feed_forward_network(tensor: np.ndarray) -> np.ndarray:
+    """
+    Aplica a Feed-Forward Network de duas camadas.
+
+    FFN(x) = max(0, x @ W1 + b1) @ W2 + b2
+
+    Args:
+        tensor (ndarray): Tensor de entrada com shape (Batch, Seq, D_MODEL).
+
+    Returns:
+        ndarray: Tensor de saída com shape (Batch, Seq, D_MODEL).
+    """
+    camada_expandida = np.maximum(0, tensor @ W1 + b1)
+    saida_contraida = camada_expandida @ W2 + b2
+    return saida_contraida
+
+
+X_ffn = feed_forward_network(X_norm1)
+X_norm2 = adicionar_e_normalizar(X_norm1, X_ffn)
+print(f"Saída da FFN + Add & LayerNorm 2 — shape: {X_norm2.shape}")
